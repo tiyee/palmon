@@ -1,0 +1,32 @@
+
+FROM golang:latest AS builder
+
+WORKDIR /build
+
+
+
+ENV GO111MODULE=on
+ENV GOPROXY=https://goproxy.cn,direct
+
+COPY go.mod .
+RUN go mod download
+
+COPY . .
+RUN make worker
+FROM alpine:latest AS final
+
+WORKDIR /app
+COPY --from=builder /build/bin/worker /app/
+# mirrors.cloud.tencent.com
+# mirrors.aliyun.com
+RUN echo "https://mirrors.cloud.tencent.com/alpine/latest-stable/main/" > /etc/apk/repositories \
+    && echo "https://mirrors.cloud.tencent.com/alpine/latest-stable/community/" >> /etc/apk/repositories \
+    && apk update  \
+    && apk upgrade  \
+    && apk add --no-cache tzdata \
+    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime  \
+    && echo Asia/Shanghai > /etc/timezone \
+    && apk del tzdata
+
+EXPOSE 8080
+

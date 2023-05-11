@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile.coordinator
+    command:  /app/coordinator
+    restart: on-failure
+    ports:
+      - "8083:8083"
+    expose:
+      - "8083"
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /data/logs/palmon/:/app/logs/
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    command:  /app/worker
+    restart: on-failure
+    depends_on:
+      - coordinator
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /data/logs/palmon/:/app/logs/
