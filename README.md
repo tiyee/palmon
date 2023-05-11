@@ -7,26 +7,39 @@
 
 ## Demo
 
-目前本人在二级目录下部署了palmon
+目前本人在二级目录下部署了该项目，仅做示例
 
 ### 创建任务
+
 > curl -XPOST https://uploader.tiyee.com.cn/palmon/task -d '{"processor":2,"payload":"12344","Prior":1}'
+
 结果
+
 ```json
 {
 	"error": 0,
 	"message": "ok",
 	"data":
 	{
-		"task_id": 393776143699808259
+		"task_id": 393778421588561921
 	}
 }
 ```
+
 ### 获取任务状态和详情
-> curl 'https://uploader.tiyee.com.cn/palmon/task?task_id=393776143699808259'
+
+> curl 'https://uploader.tiyee.com.cn/palmon/task?task_id=393778421588561921'
 
 ```json
-
+{
+	"error": 0,
+	"message": "ok",
+	"data":{
+		"task_id": 393778421588561921,
+		"state": 2,
+		"result": "1234412344"
+	}
+}
 ```
 
 
@@ -158,6 +171,6 @@ sudo docker-compose -f docker-compose.yml up -d
 | ---------- | -------- | ------------- |
 | puller    | - | 自带，执行从`coordinator`拉取任务的工作 |
 | pusher| - | 自带，任务执行完后，由pusher将结果推送给`coordinator`     |
-| proc1 | 2| 自定义执行器，demo |
+| proc1 | 2| 自定义执行器，当做一个简单demo，只是将payload repeat 一次然后返回 |
 
 执行器是用来执行任务点，`worker`从`coordinator`拉取任务后，根据任务的类型，由不同的执行器去执行。但有两个个例外，分别是puller和pusher，他们的任务不是从coordinator获取的，而是节点内部生成的。`dispatcher`会按照指定的策略定期往节点`jobChannel`写入拉取任务，然后puller获取这个任务后就去coorddinator拉取任务，然后将任务投入`jobChannel`。同理，pusher的任务也不是`coordinator`获取的， 其他执行器执行完任务后，会将执行结果写入pusher任务的payload里，然后由pusher将payload的内容包装成json数据推送给`coordinator`,
