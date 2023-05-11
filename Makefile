@@ -18,12 +18,11 @@ default: usage
 usage:
 	@echo
 	@echo "-> usage:"
-	@echo "make proto \t\t\t 根据proto更新当前项目的pb.go和pb.gw.go"
+	@echo "make build \t\t\t 同时编译 coordinator 和 worker"
 	@echo "make vet  \t\t\t 当前项目代码静态检查"
-	@echo "make build \t\t\t 构建当前项目"
-	@echo "make run  \t\t 运行当前项目"
-	@echo "make forever \t\t\t deamon 运行"
-	@echo
+	@echo "make coordinator \t\t\t 构建coordinator"
+	@echo "make worker  \t\t 构建 worker"
+	@echo "make clean \t\t\t 清理"
 env:
 	@go mod tidy
 vet:
