@@ -12,7 +12,7 @@ type Job struct {
 }
 
 func (j *Job) Valid() error {
-	if j.Processor == 0 || j.Processor >= len(consts.Processors) {
+	if j.Processor < 2 || j.Processor >= len(consts.Processors) {
 		return errors.New("invalid processor")
 	}
 	if j.Prior < 1 || j.Prior > 3 {
