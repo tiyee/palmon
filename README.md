@@ -82,7 +82,7 @@
 
 | 名称       | 类型     | 说明          |
 | ---------- | -------- | ------------- |
-| processor     | `integer` | 任务类型编号(也可以称之为执行者编号)，以区分不同的任务，以便用不同的执行器去执行|
+| processor     | `enum<integer>` | 任务类型编号(也可以称之为执行者编号)，用来区分不同的任务，以便用不同的执行器去执行.目前只做了2这一个执行器。 |
 | payload | `any` | 任务携带的信息      |
 | prior | `enum<integer>` | 优先级，1-高,2-中,3-低 |
 
@@ -117,7 +117,7 @@
 | 名称       | 类型     | 说明          |
 | ---------- | -------- | ------------- |
 | task_id     | `integer` | 任务id |
-| state | `integer` | 任务执行状态,0-待执行,1-执行中,2-已完成,3-已取消,4-发送错误      |
+| state | `enum<integer>` | 任务执行状态,0-待执行,1-执行中,2-已完成,3-已取消,4-发送错误      |
 | result | `any` | 执行结果,json化数据 |
 
 ## 部署
@@ -139,23 +139,23 @@ sudo docker-compose -f docker-compose.yml up -d
 ### kubernetes部署
 
 本项目涉及的`coordinator`和`worker`是互相独立的，需要分别打包，可以直接利用github或其他自带的ci/cd工具打包后将镜像上传到镜像仓库，
-但是目前不是高可用架构，`coordinator`只能部署一个pod，`worker`不限制pod数量。默认的`Puller`和`Pusher`执行器里的`coordinator`地址需要更改成k8s点的内部svc地址
+但是目前不是高可用架构，`coordinator`只能部署一个pod，`worker`不限制pod数量。默认的`Puller`和`Pusher`里的`coordinator`的地址需要更改成k8s点的内部svc地址
 
 ## 高可用配置
 
 ![](https://img.tiyee.cn/u/le52t3.jpg!w400)
 
 如图所示，存储和队列系统目前是一个纯go的简单实现，跟`coordinator`耦合在一起，`worker`会不断从`coordinator`拉取任务并执行，然后将任务的执行结果推送到`coordinator`,
-如果`coordinator`部署多份，就会任务分布在不同的pod，不能互相备份。
+如果`coordinator`部署多份，就会任务分布在不同的pod，数据不一致。
 
-如果要高可用，存储和队列需要独立部署且本身就是高可用的。这样`coordinator`就可以多点部署，然后通过vip系统或k8s的svc来统一访问。
+如果要高可用，存储和队列需要独立部署，它们本身需要是高可用的。然后`coordinator`就可以多点部署，通过vip系统或k8s的svc来统一访问`coordinator`。
 
 ## 优先队列
 
 每个任务都有优先级`prior`属性,它是是一个数字，越小表示优先级越高。如果只是单纯按优先级来执行，有可能会导致低优先级的任务一直得不到执行，俗称`饿死`。所以还得考虑时间因素。
 于是，根据一定算法，计算了一个`score`值，公式如下
 
-`score= (1<<62) - (prior<<41) - factor * epochTimestamp`
+`score= ( 1 << 62 ) - ( prior << 41 ) - factor * epochTimestamp`
 
 我们可以通过设置`factor`大小来控制时间因素的影响，这样可以保证低优先级的任务也能被执行。
 
@@ -175,4 +175,10 @@ sudo docker-compose -f docker-compose.yml up -d
 | pusher| - | 自带，任务执行完后，由pusher将结果推送给`coordinator`     |
 | proc1 | 2| 自定义执行器，当做一个简单demo，只是将payload repeat 一次然后返回 |
 
-执行器是用来执行任务点，`worker`从`coordinator`拉取任务后，根据任务的类型，由不同的执行器去执行。但有两个个例外，分别是puller和pusher，他们的任务不是从coordinator获取的，而是节点内部生成的。`dispatcher`会按照指定的策略定期往节点`jobChannel`写入拉取任务，然后puller获取这个任务后就去coorddinator拉取任务，然后将任务投入`jobChannel`。同理，pusher的任务也不是`coordinator`获取的， 其他执行器执行完任务后，会将执行结果写入pusher任务的payload里，然后由pusher将payload的内容包装成json数据推送给`coordinator`,
+执行器是用来执行任务点，`worker`从`coordinator`拉取任务后，根据任务的类型，由不同的执行器去执行。
+
+但有两个个例外，分别是puller和pusher，他们的任务不是从coordinator获取的，而是节点内部生成的。
+
+`dispatcher`会按照指定的策略定期往节点`jobChannel`写入拉取任务，然后puller获取这个任务后就去coorddinator拉取任务，随后将任务投入`jobChannel`。
+
+同理，pusher的任务也不是`coordinator`获取的， 其他执行器执行完任务后，会将执行结果写入pusher任务的payload里，然后由pusher将payload的内容包装成json数据推送给`coordinator`,
