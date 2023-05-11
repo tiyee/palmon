@@ -3,6 +3,7 @@ package comsumer
 import (
 	"fmt"
 	"github.com/tiyee/palmon/consts"
+	"strconv"
 	"time"
 )
 
@@ -46,9 +47,8 @@ func (d *Dispatcher) Run() {
 	for {
 		i++
 		time.Sleep(time.Second * 1)
-		d.jobQueue <- Job{Processor: consts.PULLER, Payload: []byte("aaa")}
-		fmt.Println("run ", i)
-		if i == 1000 {
+		d.jobQueue <- Job{Processor: consts.PULLER, Payload: []byte(strconv.FormatInt(int64(i), 10))}
+		if i == 1000000 {
 			d.quit <- true
 			time.Sleep(time.Second * 3)
 			break
