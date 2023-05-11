@@ -122,6 +122,8 @@
 
 ## 部署
 
+> 注意，如果是mac系统，编译的时候需要修改`export GOOS=linux`为`export GOOS=darwin`
+
 ### docker部署
 
 最简单的是`docker-compose`，直接执行下面命令
