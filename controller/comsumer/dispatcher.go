@@ -46,7 +46,7 @@ func (d *Dispatcher) Run() {
 	i := 0
 	for {
 		i++
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Second * 3)
 		d.jobQueue <- Job{Processor: consts.PULLER, Payload: []byte(strconv.FormatInt(int64(i), 10))}
 		if i == 1000000 {
 			d.quit <- true
