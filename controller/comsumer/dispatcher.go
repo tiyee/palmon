@@ -7,16 +7,6 @@ import (
 	"time"
 )
 
-func Add() {
-	ticker := time.NewTicker(time.Millisecond * 100)
-	go func() {
-		for { //循环
-			<-ticker.C
-			fmt.Println("i = ")
-		}
-	}()
-}
-
 type Dispatcher struct {
 	workerPool chan *worker
 	jobQueue   chan Job
