@@ -166,7 +166,7 @@ sudo docker-compose -f docker-compose.yml up -d
 
 所以，可以根据任务优先级投递到不同优先级的队列，然后由一个晒鞋者分别循环读取这些队列，再决定是否投入到活动队列。这种方案用任何队列都可实现，该过程如下图所示。
 
-![优先队列。](https://img.tiyee.cn/u/bce2t3.jpg)
+![优先队列。](https://img.tiyee.cn/u/bce2t3.jpg?1)
 
 ## 执行器
 | 名称       | ID     | 说明          |
