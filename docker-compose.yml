@@ -11,8 +11,6 @@ services:
       - "8083:8083"
     expose:
       - "8083"
-    environment:
-      - TZ=Asia/Shanghai
     volumes:
       - /data/logs/palmon/:/app/logs/
   worker:
@@ -23,7 +21,5 @@ services:
     restart: on-failure
     depends_on:
       - coordinator
-    environment:
-      - TZ=Asia/Shanghai
     volumes:
       - /data/logs/palmon/:/app/logs/
