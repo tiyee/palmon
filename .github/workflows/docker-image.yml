@@ -16,4 +16,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile.coordinator --tag palmon:v0.0.1
+      run: |
+        docker build . --file Dockerfile.coordinator --tag coordinator:v0.0.2
+        docker build . --file Dockerfile.worker --tag worker:v0.0.2
